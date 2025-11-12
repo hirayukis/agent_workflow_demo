@@ -33,18 +33,20 @@
 #   - actions/upload-artifact@v5 (330a01c490aca151604b8cf639adc76d48f6c5d4)
 #     https://github.com/actions/upload-artifact/commit/330a01c490aca151604b8cf639adc76d48f6c5d4
 
-name: "Issue Clarifier"
+name: "Issue Triage Assistant"
 "on":
   issues:
     types:
     - opened
 
-permissions: read-all
+permissions:
+  actions: read
+  contents: read
 
 concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.issue.number }}"
 
-run-name: "Issue Clarifier"
+run-name: "Issue Triage Assistant"
 
 jobs:
   activation:
@@ -177,7 +179,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         env:
           GH_AW_AGENT_OUTPUT: ${{ env.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Issue Clarifier"
+          GH_AW_WORKFLOW_NAME: "Issue Triage Assistant"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -538,7 +540,9 @@ jobs:
   agent:
     needs: activation
     runs-on: ubuntu-latest
-    permissions: read-all
+    permissions:
+      actions: read
+      contents: read
     env:
       GH_AW_SAFE_OUTPUTS: /tmp/gh-aw/safeoutputs/outputs.jsonl
     outputs:
@@ -632,7 +636,7 @@ jobs:
         run: |
           mkdir -p /tmp/gh-aw/safeoutputs
           cat > /tmp/gh-aw/safeoutputs/config.json << 'EOF'
-          {"add_comment":{"max":1},"missing_tool":{}}
+          {"add_comment":{"max":2},"missing_tool":{}}
           EOF
           cat > /tmp/gh-aw/safeoutputs/mcp-server.cjs << 'EOF'
             const fs = require("fs");
@@ -1484,9 +1488,17 @@ jobs:
           PROMPT_DIR="$(dirname "$GH_AW_PROMPT")"
           mkdir -p "$PROMPT_DIR"
           cat > "$GH_AW_PROMPT" << 'PROMPT_EOF'
-          # Issue Clarifier
+          # Issue Triage Assistant
           
-          Analyze the current issue and ask for additional details if the issue is unclear.
+          When a new issue is created, analyze the issue content and provide helpful guidance.
+          
+          Examine the issue title and description for:
+          - Bug reports that need additional information
+          - Feature requests that should be categorized
+          - Questions that can be answered immediately
+          - Issues that might be duplicates
+          
+          Respond with a helpful comment that guides the user on next steps or provides immediate assistance.
           
           PROMPT_EOF
       - name: Append XPIA security instructions to prompt
@@ -1684,7 +1696,7 @@ jobs:
               model: "",
               version: "",
               agent_version: "0.0.354",
-              workflow_name: "Issue Clarifier",
+              workflow_name: "Issue Triage Assistant",
               experimental: false,
               supports_tools_allowlist: true,
               supports_http_transport: true,
@@ -3940,7 +3952,7 @@ jobs:
       - name: Setup threat detection
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         env:
-          WORKFLOW_NAME: "Issue Clarifier"
+          WORKFLOW_NAME: "Issue Triage Assistant"
           WORKFLOW_DESCRIPTION: "No description provided"
         with:
           script: |

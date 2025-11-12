@@ -2,13 +2,22 @@
 on:
   issues:
     types: [opened]
-
-permissions: read-all 
-
+permissions:
+  contents: read
+  actions: read
 safe-outputs:
   add-comment:
+    max: 2
 ---
 
-# Issue Clarifier
+# Issue Triage Assistant
 
-Analyze the current issue and ask for additional details if the issue is unclear.
+When a new issue is created, analyze the issue content and provide helpful guidance.
+
+Examine the issue title and description for:
+- Bug reports that need additional information
+- Feature requests that should be categorized
+- Questions that can be answered immediately
+- Issues that might be duplicates
+
+Respond with a helpful comment that guides the user on next steps or provides immediate assistance.
